@@ -9,27 +9,32 @@
             margin: 0;
             height: 100vh;
             background: black;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        button {
-            padding: 30px 50px;
+            font-family: Arial, sans-serif;
             font-size: 24px;
-            background: #0f0;
-            color: black;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
         }
     </style>
 </head>
-<body>
+<body onclick="attack()">
 
-    <button onclick="document.getElementById('s').play()">НАЖМИ СЮДА</button>
+    НАЖМИ В ЛЮБОЕ МЕСТО
     
-    <!-- ЗАМЕНИ НА СВОЁ ИМЯ ФАЙЛА -->
-    <audio id="s" src="stohn.mp3" preload="auto"></audio>
+    <!-- ЗАМЕНИ НА ИМЯ СВОЕГО ФАЙЛА -->
+    <audio id="s" src="stohn.mp3" preload="auto" loop></audio>
+
+    <script>
+        function attack() {
+            var audio = document.getElementById('s');
+            audio.loop = true;
+            audio.volume = 1.0;
+            audio.play();
+            document.body.innerHTML = '⚠️ ЗВУК ⚠️';
+            document.body.style.color = 'red';
+        }
+    </script>
 
 </body>
 </html>

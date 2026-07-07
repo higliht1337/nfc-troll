@@ -15,25 +15,22 @@
             justify-content: center;
             font-family: Arial, sans-serif;
             font-size: 24px;
+            text-align: center;
         }
     </style>
 </head>
-<body onclick="attack()">
+<body>
 
-    НАЖМИ В ЛЮБОЕ МЕСТО
-    
-    <!-- ЗАМЕНИ НА ИМЯ СВОЕГО ФАЙЛА -->
+    НАЖМИ В ЛЮБОЕ МЕСТО ЭКРАНА
+
     <audio id="s" src="stohn.mp3" preload="auto" loop></audio>
 
     <script>
-        function attack() {
-            var audio = document.getElementById('s');
-            audio.loop = true;
-            audio.volume = 1.0;
-            audio.play();
-            document.body.innerHTML = '⚠️ ЗВУК ⚠️';
-            document.body.style.color = 'red';
-        }
+        document.body.onclick = function() {
+            var a = document.getElementById('s');
+            a.loop = true;
+            a.play();
+        };
     </script>
 
 </body>

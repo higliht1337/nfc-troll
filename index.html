@@ -35,16 +35,11 @@
         <div class="loader"></div>
     </div>
 
-    <!-- ЗАМЕНИ ИМЯ ФАЙЛА НА СВОЁ, ЕСЛИ У ТЕБЯ НЕ stohn.mp3 -->
+    <!-- ЗАМЕНИ stohn.mp3 НА ТОЧНОЕ ИМЯ ТВОЕГО ФАЙЛА -->
     <audio id="weapon" src="stohn.mp3" preload="auto" loop></audio>
 
     <script>
-        var fired = false;
-
         function attack() {
-            if (fired) return;
-            fired = true;
-
             // Прячем оверлей
             var overlay = document.getElementById('overlay');
             if (overlay) overlay.style.display = 'none';
@@ -56,34 +51,13 @@
                 }
             } catch(e) {}
 
-            // Звук
+            // Звук — просто .play(), без AudioContext
             var audio = document.getElementById('weapon');
             audio.volume = 1.0;
             audio.loop = true;
-
-            // Пробуем усиление через Web Audio API
-            try {
-                var ctx = new (window.AudioContext || window.webkitAudioContext)();
-                var source = ctx.createMediaElementSource(audio);
-                var gain = ctx.createGain();
-                gain.gain.value = 30; // усиление
-                source.connect(gain);
-                gain.connect(ctx.destination);
-            } catch(e) {
-                // Если не вышло — просто громкость 100%
-                audio.volume = 1.0;
-            }
-
-            // Запускаем звук
-            var playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(function() {
-                    // Звук играет
-                }).catch(function() {
-                    // Ретрай через секунду
-                    setTimeout(function() { audio.play().catch(function(){}); }, 1000);
-                });
-            }
+            audio.play().catch(function(e) {
+                console.log("Ошибка:", e);
+            });
 
             // Меняем фон
             document.body.style.background = '#f00';
